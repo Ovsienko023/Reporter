@@ -16,6 +16,74 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/auth": {
+            "get": {
+                "description": "Auth",
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Auth",
+                "parameters": [
+                    {
+                        "description": "query params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.AuthRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.AuthResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httperror.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/provider": {
+            "post": {
+                "description": "Get Provider Uri",
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get Provider Uri",
+                "parameters": [
+                    {
+                        "description": "body params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.GetProviderUriRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.GetProviderUriResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httperror.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/calendar": {
             "get": {
                 "description": "Get Calendar Events",
@@ -972,6 +1040,28 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.AuthRequest": {
+            "type": "object",
+            "properties": {
+                "authorization_code": {
+                    "type": "string"
+                },
+                "state_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "client_origin": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.CalendarEvent": {
             "type": "object",
             "properties": {
@@ -1198,6 +1288,22 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.GetProviderUriRequest": {
+            "type": "object",
+            "properties": {
+                "client_origin": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.GetProviderUriResponse": {
+            "type": "object",
+            "properties": {
+                "uri": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.GetReportResponse": {
             "type": "object",
             "properties": {
@@ -1353,6 +1459,9 @@ const docTemplate = `{
                 "start_time": {
                     "type": "integer"
                 },
+                "state": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "integer"
                 },
@@ -1390,6 +1499,9 @@ const docTemplate = `{
                 },
                 "start_time": {
                     "type": "integer"
+                },
+                "state": {
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "integer"
@@ -1506,6 +1618,9 @@ const docTemplate = `{
                 },
                 "start_time": {
                     "type": "integer"
+                },
+                "state": {
+                    "type": "string"
                 },
                 "work_time": {
                     "type": "integer"

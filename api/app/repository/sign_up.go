@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-const sqlCreateUser = `
+const sqlSignUp = `
 	select error
 	from main.create_user(
 	    _invoker_id := $1, 
@@ -19,7 +19,7 @@ const sqlCreateUser = `
 // ErrUnauthorized
 // ErrLoginAlreadyInUse
 func (c *Client) SignUp(ctx context.Context, msg *SignUp) error {
-	raw, err := c.driver.Query(ctx, sqlCreateUser,
+	raw, err := c.driver.Query(ctx, sqlSignUp,
 		msg.InvokerId,
 		msg.Login,
 		msg.Password,

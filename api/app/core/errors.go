@@ -5,6 +5,9 @@ import "errors"
 var (
 	ErrInternal                    = errors.New("internal error")
 	ErrUnauthorized                = errors.New("unauthorized error")
+	ErrInvalidArguments            = errors.New("invalid arguments")
+	ErrHostNotFound                = errors.New("host not found")
+	ErrProviderServerNotAvailable  = errors.New("provider server not available")
 	ErrReportIdNotFound            = errors.New("report id not found")
 	ErrDayOffIdNotFound            = errors.New("day off id not found")
 	ErrSickLeaveIdNotFound         = errors.New("sick leave id not found")

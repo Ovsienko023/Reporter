@@ -2,18 +2,32 @@ package core
 
 import (
 	"github.com/Ovsienko023/reporter/app/repository"
+	"github.com/Ovsienko023/reporter/infrastructure/configuration"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
 
 type Core struct {
-	db repository.InterfaceDatabase
+	db     repository.InterfaceDatabase
+	Cache  *Cache
+	Config configuration.Config
 }
 
-func NewCore(db repository.InterfaceDatabase) *Core {
+type CustomClaims struct {
+	UserId     string `json:"user_id"`
+	ServerHost string `json:"server_host"`
+	jwt.StandardClaims
+}
+
+func NewCore(cfg configuration.Config, db repository.InterfaceDatabase) *Core {
+	cache := newCache()
+	go cache.Clean()
+
 	return &Core{
-		db: db,
+		db:     db,
+		Cache:  newCache(),
+		Config: cfg,
 	}
 }
 

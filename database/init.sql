@@ -27,6 +27,12 @@ create table if not exists main.users
     payload      jsonb
 );
 
+alter table if exists main.user_logins
+    add user_id uuid;
+
+alter table main.user_logins
+    alter column grant_id drop not null;
+
 -- CREDENTIALS ++++
 -- +++
 create table if not exists main.user_passwords

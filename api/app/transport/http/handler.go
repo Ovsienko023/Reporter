@@ -43,6 +43,30 @@ func (t *Transport) SignUp(w http.ResponseWriter, r *http.Request) {
 	handlers.SignUp(&t.core, w, r)
 }
 
+// Auth ...  Auth
+// @Summary Auth
+// @Description Auth
+// @Tags Auth
+// @Param request body domain.AuthRequest true "query params"
+// @Success 200 {object} domain.AuthResponse
+// @Failure 500 {object} httperror.ErrorResponse
+// @Router /api/v1/auth [get]
+func (t *Transport) Auth(w http.ResponseWriter, r *http.Request) {
+	handlers.Auth(&t.core, w, r)
+}
+
+// GetProviderUri ...  GetProviderUri
+// @Summary Get Provider Uri
+// @Description Get Provider Uri
+// @Tags Auth
+// @Param request body domain.GetProviderUriRequest true "body params"
+// @Success 200 {object} domain.GetProviderUriResponse
+// @Failure 500 {object} httperror.ErrorResponse
+// @Router /api/v1/auth/provider [post]
+func (t *Transport) GetProviderUri(w http.ResponseWriter, r *http.Request) {
+	handlers.GetProviderUri(&t.core, w, r)
+}
+
 // PROFILE
 
 // GetProfile ...  Get Profile

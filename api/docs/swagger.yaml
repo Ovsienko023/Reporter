@@ -7,6 +7,20 @@ definitions:
       object_type:
         type: string
     type: object
+  domain.AuthRequest:
+    properties:
+      authorization_code:
+        type: string
+      state_id:
+        type: string
+    type: object
+  domain.AuthResponse:
+    properties:
+      client_origin:
+        type: string
+      token:
+        type: string
+    type: object
   domain.CalendarEvent:
     properties:
       date_from:
@@ -153,6 +167,16 @@ definitions:
       login:
         type: string
     type: object
+  domain.GetProviderUriRequest:
+    properties:
+      client_origin:
+        type: string
+    type: object
+  domain.GetProviderUriResponse:
+    properties:
+      uri:
+        type: string
+    type: object
   domain.GetReportResponse:
     properties:
       report:
@@ -253,6 +277,8 @@ definitions:
         type: string
       start_time:
         type: integer
+      state:
+        type: string
       updated_at:
         type: integer
       work_time:
@@ -278,6 +304,8 @@ definitions:
         type: string
       start_time:
         type: integer
+      state:
+        type: string
       updated_at:
         type: integer
       work_time:
@@ -353,6 +381,8 @@ definitions:
         type: integer
       start_time:
         type: integer
+      state:
+        type: string
       work_time:
         type: integer
     type: object
@@ -426,6 +456,50 @@ info:
   title: Reporter API
   version: 0.0.1
 paths:
+  /api/v1/auth:
+    get:
+      description: Auth
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AuthRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AuthResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperror.ErrorResponse'
+      summary: Auth
+      tags:
+      - Auth
+  /api/v1/auth/provider:
+    post:
+      description: Get Provider Uri
+      parameters:
+      - description: body params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.GetProviderUriRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GetProviderUriResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperror.ErrorResponse'
+      summary: Get Provider Uri
+      tags:
+      - Auth
   /api/v1/calendar:
     get:
       description: Get Calendar Events

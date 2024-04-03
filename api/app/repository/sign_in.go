@@ -13,13 +13,13 @@ const sqlSignIn = `
     where login = $1 and
           u.deleted_at is null`
 
-func (c *Client) SignIn(ctx context.Context, msg *SignIn) (*Auth, error) {
+func (c *Client) SignIn(ctx context.Context, msg *SignIn) (*SignInResponse, error) {
 	row, err := c.driver.Query(ctx, sqlSignIn, msg.Login)
 	if err != nil {
 		return nil, NewInternalError(err)
 	}
 
-	auth := &Auth{}
+	auth := &SignInResponse{}
 
 	for row.Next() {
 		err := row.Scan(
@@ -42,7 +42,7 @@ type SignIn struct {
 	Login string `json:"login,omitempty"`
 }
 
-type Auth struct {
+type SignInResponse struct {
 	UserId   *string `json:"id,omitempty"`
 	Password *string `json:"password,omitempty"`
 }

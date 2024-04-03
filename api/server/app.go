@@ -23,8 +23,8 @@ type App struct {
 }
 
 func NewApp(cnf *configuration.Config) *App {
-	client, _ := repository.New(&cnf.Db)
-	recordCore := core.NewCore(client)
+	db, _ := repository.New(&cnf.Db)
+	recordCore := core.NewCore(*cnf, db)
 
 	return &App{
 		recordCore: recordCore,

@@ -48,3 +48,16 @@ func (r *ErrorResponse) Done(w http.ResponseWriter, code int, description string
 	_, _ = w.Write([]byte(response))
 
 }
+
+func (r *ErrorResponse) Marshaling() ([]byte, error) {
+	if len(r.Error.Details) == 0 {
+		r.Error.Details = []ErrorResponseDetails{}
+	}
+
+	response, err := json.Marshal(r)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}

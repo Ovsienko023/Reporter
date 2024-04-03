@@ -14,24 +14,34 @@ func init() {
 	}
 }
 
-type Doc struct {
-	Host string `yaml:"host"`
-	Port string `yaml:"port"`
+type Config struct {
+	Api Api `yaml:"api"`
+	Db  Db  `yaml:"db"`
+	Tcs Tcs `yaml:"tcs"`
 }
 
-type Api struct {
-	Host string `yaml:"host"`
-	Port string `yaml:"port"`
-	Doc  Doc    `yaml:"doc"`
-}
+type (
+	Api struct {
+		Host        string `yaml:"host"`
+		Port        string `yaml:"port"`
+		TokenSecret string `yaml:"token_secret"`
+		Doc         Doc    `yaml:"doc"`
+	}
+
+	Doc struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	}
+)
 
 type Db struct {
 	ConnStr string `yaml:"conn_str"`
 }
 
-type Config struct {
-	Api Api `yaml:"api"`
-	Db  Db  `yaml:"db"`
+type Tcs struct {
+	Host         string `yaml:"host"`
+	ClientId     string `yaml:"client_id"`
+	ClientSecret string `yaml:"client_secret"`
 }
 
 const (
@@ -59,18 +69,39 @@ func NewConfig() (*Config, error) {
 		Db{
 			ConnStr: DefaultDbConnStr,
 		},
+		Tcs{
+			Host:         "",
+			ClientId:     "",
+			ClientSecret: "",
+		},
 	}
 
-	if dbConn, ok := os.LookupEnv("RP_DATABASE_CONN_STRING"); ok {
-		cfg.Db.ConnStr = dbConn
+	if key, ok := os.LookupEnv("RP_DATABASE_CONN_STRING"); ok {
+		cfg.Db.ConnStr = key
 	}
 
-	if docHost, ok := os.LookupEnv("RP_DOC_HOST"); ok {
-		cfg.Api.Doc.Host = docHost
+	if key, ok := os.LookupEnv("RP_DOC_HOST"); ok {
+		cfg.Api.Doc.Host = key
 	}
 
-	if docPort, ok := os.LookupEnv("RP_DOC_PORT"); ok {
-		cfg.Api.Doc.Port = docPort
+	if key, ok := os.LookupEnv("RP_DOC_PORT"); ok {
+		cfg.Api.Doc.Port = key
+	}
+
+	if key, ok := os.LookupEnv("RP_API_TOKEN_SECRET"); ok {
+		cfg.Api.TokenSecret = key
+	}
+
+	if key, ok := os.LookupEnv("RP_TCS_HOST"); ok {
+		cfg.Tcs.Host = key
+	}
+
+	if key, ok := os.LookupEnv("RP_TCS_CLIENT_ID"); ok {
+		cfg.Tcs.ClientId = key
+	}
+
+	if key, ok := os.LookupEnv("RP_TCS_CLIENT_SECRET"); ok {
+		cfg.Tcs.ClientSecret = key
 	}
 
 	var err error
