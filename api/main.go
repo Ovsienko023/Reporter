@@ -1,12 +1,17 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
+	"log"
+
 	"github.com/Ovsienko023/reporter/infrastructure/configuration"
 	"github.com/Ovsienko023/reporter/server"
-	"log"
 )
+
+//go:embed store_fs/*
+var embedFS embed.FS
 
 // @title Reporter API
 // @version 0.0.1
@@ -24,7 +29,7 @@ func main() {
 
 	fmt.Printf("Running on: %s:%s \n", cfg.Api.Host, cfg.Api.Port)
 
-	app := server.NewApp(cfg)
+	app := server.NewApp(cfg, embedFS)
 	if err := app.Run(&cfg.Api); err != nil {
 		log.Fatalf("%s", err.Error())
 	}

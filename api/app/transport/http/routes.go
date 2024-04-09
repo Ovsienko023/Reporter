@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -19,6 +20,7 @@ func RegisterHTTPEndpoints(router chi.Router, c core.Core, apiConfig *configurat
 	router.Get("/api/v1/echo", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Add("Content-Type", "application/json")
 		writer.WriteHeader(http.StatusOK)
+		c.ExportXLSXReports(context.Background())
 		_, _ = writer.Write([]byte("{'status': 'ok', 'version: '1.1.22'}"))
 	})
 

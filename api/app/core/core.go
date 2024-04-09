@@ -1,17 +1,21 @@
 package core
 
 import (
-	"github.com/Ovsienko023/reporter/app/repository"
-	"github.com/Ovsienko023/reporter/infrastructure/configuration"
+	"embed"
+	"strings"
+
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
-	"strings"
+
+	"github.com/Ovsienko023/reporter/app/repository"
+	"github.com/Ovsienko023/reporter/infrastructure/configuration"
 )
 
 type Core struct {
 	db     repository.InterfaceDatabase
 	Cache  *Cache
 	Config configuration.Config
+	Fs     embed.FS
 }
 
 type CustomClaims struct {
@@ -20,7 +24,7 @@ type CustomClaims struct {
 	jwt.StandardClaims
 }
 
-func NewCore(cfg configuration.Config, db repository.InterfaceDatabase) *Core {
+func NewCore(cfg configuration.Config, db repository.InterfaceDatabase, fs embed.FS) *Core {
 	cache := newCache()
 	go cache.Clean()
 
@@ -28,6 +32,7 @@ func NewCore(cfg configuration.Config, db repository.InterfaceDatabase) *Core {
 		db:     db,
 		Cache:  newCache(),
 		Config: cfg,
+		Fs:     fs,
 	}
 }
 

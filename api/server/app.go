@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"embed"
 	"log"
 	"net/http"
 	"os"
@@ -24,9 +25,9 @@ type App struct {
 	recordCore *core.Core
 }
 
-func NewApp(cnf *configuration.Config) *App {
+func NewApp(cnf *configuration.Config, fs embed.FS) *App {
 	db, _ := repository.New(&cnf.Db)
-	recordCore := core.NewCore(*cnf, db)
+	recordCore := core.NewCore(*cnf, db, fs)
 
 	return &App{
 		recordCore: recordCore,
