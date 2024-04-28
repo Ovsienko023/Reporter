@@ -1,7 +1,7 @@
 .PHONY: build
 build:
 	gox -osarch="linux/amd64" \
-	-output="./reporter"
+	-output="./web-api"
 
 #.PHONY: build
 #build:
