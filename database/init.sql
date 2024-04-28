@@ -27,12 +27,6 @@ create table if not exists main.users
     payload      jsonb
 );
 
-alter table if exists main.user_logins
-    add user_id uuid;
-
-alter table main.user_logins
-    alter column grant_id drop not null;
-
 -- CREDENTIALS ++++
 -- +++
 create table if not exists main.user_passwords
@@ -52,8 +46,9 @@ create index if not exists __deleted_at_idx on main.user_passwords (deleted_at) 
 create table if not exists main.user_logins
 (
     id         uuid primary key     default gen_random_uuid(),
+    user_id    uuid,
     login      varchar     not null,
-    grant_id   uuid        not null references main.user_passwords (id),
+    grant_id   uuid        references main.user_passwords (id),
     created_at timestamptz not null default now(),
     creator_id uuid        not null references main.users (id),
     deleted_at timestamptz

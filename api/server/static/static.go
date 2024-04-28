@@ -35,7 +35,7 @@ func (h *Server) Handler(next http.Handler) http.Handler {
 			if err != nil { // todo проверить что ошибка == file not found
 				//  в противном случае отдаём index
 				http.ServeFile(w, r, filepath.Join(filesPath, "index.html"))
-				//return
+				return
 			}
 
 			// если удаётся найти файл, то сервим его
