@@ -117,6 +117,10 @@ func NewConfig() (*Config, error) {
 		cfg.Api.TokenSecret = key
 	}
 
+	if key, ok := os.LookupEnv("RP_API_POST"); ok {
+		cfg.Api.Port = key
+	}
+
 	if key, ok := os.LookupEnv("RP_STATIC_FILE_PATH"); ok {
 		cfg.Api.Static.FilesPath = key
 	}
