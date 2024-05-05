@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/Ovsienko023/reporter/infrastructure/configuration"
 	"github.com/Ovsienko023/reporter/server"
+	"github.com/joho/godotenv"
 	"log"
 )
 
@@ -16,16 +16,21 @@ import (
 func main() {
 	flag.Parse()
 
-	cfg, err := configuration.NewConfig()
+	if err := godotenv.Load(); err != nil {
+		log.Println("Not found locale .env file", err.Error())
+	}
 
+	cfg, err := configuration.New() // TODO: Добавить полечение пути к конфигу через flag
 	if err != nil {
 		log.Fatalf("Could not read configuration file with error: %+v", err)
 	}
 
-	fmt.Printf("Running on: %s:%s \n", cfg.Api.Host, cfg.Api.Port)
+	// TODO: Добавить инициализацию логера
+
+	log.Printf("-- Running on: %s:%s \n", cfg.Api.Host, cfg.Api.Port)
 
 	app := server.NewApp(cfg)
-	if err := app.Run(&cfg.Api); err != nil {
+	if err := app.Run(cfg); err != nil {
 		log.Fatalf("%s", err.Error())
 	}
 }

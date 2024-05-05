@@ -33,28 +33,28 @@ func NewApp(cnf *configuration.Config) *App {
 	}
 }
 
-func (a *App) Run(apiConfig *configuration.Api) error {
+func (a *App) Run(config *configuration.Config) error {
 	router := chi.NewRouter()
 
-	staticServer := static.New(apiConfig.Static.FilesPath)
+	staticServer := static.New(config.Static.FilesPath)
 
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 	router.Use(staticServer.Handler)
 
-	r := transportHttp.RegisterHTTPEndpoints(router, *a.recordCore, apiConfig)
+	r := transportHttp.RegisterHTTPEndpoints(router, *a.recordCore, config)
 
 	a.httpServer = &http.Server{
-		Addr:           apiConfig.Host + ":" + apiConfig.Port,
+		Addr:           config.Api.Host + ":" + config.Api.Port,
 		Handler:        r,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	if apiConfig.Tls.Enable {
-		a.startTls(apiConfig)
+	if config.Tls.Enable {
+		a.startTls(config)
 	} else {
 		a.startWithoutTls()
 	}
@@ -70,7 +70,7 @@ func (a *App) Run(apiConfig *configuration.Api) error {
 	return a.httpServer.Shutdown(ctx)
 }
 
-func (a *App) startTls(cfg *configuration.Api) {
+func (a *App) startTls(cfg *configuration.Config) {
 	go func() {
 		if err := a.httpServer.ListenAndServeTLS(
 			cfg.Tls.CertFilePath,

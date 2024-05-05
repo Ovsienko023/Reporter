@@ -12,7 +12,7 @@ import (
 	"github.com/Ovsienko023/reporter/infrastructure/configuration"
 )
 
-func RegisterHTTPEndpoints(router chi.Router, c core.Core, apiConfig *configuration.Api) http.Handler {
+func RegisterHTTPEndpoints(router chi.Router, c core.Core, apiConfig *configuration.Config) http.Handler {
 	swaggerUrl := fmt.Sprintf("http://%s:%s/docs/doc.json", apiConfig.Doc.Host, apiConfig.Doc.Port)
 	h := NewTransport(c)
 

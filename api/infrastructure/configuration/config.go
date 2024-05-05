@@ -1,172 +1,112 @@
 package configuration
 
 import (
-	"fmt"
-	"os"
-	"strconv"
-
+	"github.com/BurntSushi/toml"
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/joho/godotenv"
+	"log"
+	"os"
+	"path/filepath"
 )
 
-func init() {
-	// loads values from .env into the system
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("Not found locale .env file", err.Error())
-	}
-}
+//const DefaultConfigPath = ""
 
 type Config struct {
-	Api Api `yaml:"api"`
-	Db  Db  `yaml:"db"`
-	Tcs Tcs `yaml:"tcs"`
+	Api    Api    `yaml:"api"`
+	Db     Db     `yaml:"db"`
+	Tls    Tls    `toml:"tls"`
+	Static Static `toml:"static"`
+	Doc    Doc    `toml:"doc"`
+	Tcs    Tcs    `yaml:"tcs"`
 }
 
 type (
 	Api struct {
-		Host        string `yaml:"host"`
-		Port        string `yaml:"port"`
-		TokenSecret string `yaml:"token_secret"`
-		Doc         Doc    `yaml:"doc"`
-		Static      Static `yaml:"static"`
-		Tls         Tls    `yaml:"tls"`
+		Host        string `toml:"host" env:"WEB_API_HOST" env-default:"127.0.0.1"`
+		Port        string `toml:"port" env:"WEB_API_PORT" env-default:"8080"`
+		TokenSecret string `toml:"token_secret" env:"WEB_API_TOKEN_SECRET"`
 	}
 
-	Doc struct {
-		Host string `yaml:"host"`
-		Port string `yaml:"port"`
+	Db struct {
+		ConnStr string `toml:"conn_str" env:"WEB_API_DB_CONN" env-default:"postgresql://postgres:1234@localhost:5442/postgres"`
 	}
 
 	Tls struct {
-		Enable       bool   `yaml:"enable"`
-		CertFilePath string `yaml:"cert_file_path"`
-		KeyFilePath  string `yaml:"key_file_path"`
+		Enable       bool   `toml:"enable" env:"WEB_API_TLS_ENABLE" env-default:"false"`
+		CertFilePath string `toml:"cert_file_path" env:"WEB_API_TLS_CERT_PATH"`
+		KeyFilePath  string `toml:"key_file_path" env:"WEB_API_TLS_KEY_PATH"`
 	}
 
 	Static struct {
-		FilesPath string `yaml:"files_path"`
+		FilesPath string `toml:"files_path" env:"WEB_API_STATIC_PATH" env-default:"web"`
+	}
+
+	Doc struct {
+		Host string `toml:"host" env:"WEB_API_DOC_HOST" env-default:"127.0.0.1"`
+		Port string `toml:"port" env:"WEB_API_DOC_PORT" env-default:"8888"`
+	}
+
+	Tcs struct {
+		Host         string `toml:"host" env:"WEB_API_AUTH_TCS_HOST"`
+		ClientId     string `toml:"client_id" env:"WEB_API_AUTH_TCS_CLIENT_ID"`
+		ClientSecret string `toml:"client_secret" env:"WEB_API_AUTH_TCS_CLIENT_SECRET"`
 	}
 )
 
-type Db struct {
-	ConnStr string `yaml:"conn_str"`
-}
+func New() (*Config, error) {
+	var cfg Config
 
-type Tcs struct {
-	Host         string `yaml:"host"`
-	ClientId     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"`
-}
+	var configFullPath string
+	rawConfFullPath := filepath.Join(filepath.Clean(*ConfigPathFlag), "web-api.toml")
 
-const (
-	DefaultConfigPath = ""
-
-	DefaultApiHost = "0.0.0.0"
-	DefaultApiPort = "443"
-
-	DefaultDocHost = "127.0.0.1"
-	DefaultDocPort = "8888"
-
-	DefaultStaticPath = "web"
-
-	DefaultDbConnStr = "postgresql://postgres:1234@localhost:5442/postgres"
-)
-
-func NewConfig() (*Config, error) {
-	cfg := &Config{
-		Api{
-			Host:        DefaultApiHost,
-			Port:        DefaultApiPort,
-			TokenSecret: "",
-			Doc: Doc{
-				Host: DefaultDocHost,
-				Port: DefaultDocPort,
-			},
-			Static: Static{
-				FilesPath: DefaultStaticPath,
-			},
-			Tls: Tls{
-				Enable:       true,
-				CertFilePath: "",
-				KeyFilePath:  "",
-			},
-		},
-		Db{
-			ConnStr: DefaultDbConnStr,
-		},
-		Tcs{
-			Host:         "",
-			ClientId:     "",
-			ClientSecret: "",
-		},
+	if ConfigPathFlag != nil && *ConfigPathFlag != "" && isExistConfig(rawConfFullPath) {
+		configFullPath = rawConfFullPath
+	} else {
+		configFullPath = DefaultConfigPath
 	}
 
-	if key, ok := os.LookupEnv("RP_DATABASE_CONN_STRING"); ok {
-		cfg.Db.ConnStr = key
-	}
-
-	if key, ok := os.LookupEnv("RP_DOC_HOST"); ok {
-		cfg.Api.Doc.Host = key
-	}
-
-	if key, ok := os.LookupEnv("RP_DOC_PORT"); ok {
-		cfg.Api.Doc.Port = key
-	}
-
-	if key, ok := os.LookupEnv("RP_API_TOKEN_SECRET"); ok {
-		cfg.Api.TokenSecret = key
-	}
-
-	if key, ok := os.LookupEnv("RP_API_POST"); ok {
-		cfg.Api.Port = key
-	}
-
-	if key, ok := os.LookupEnv("RP_STATIC_FILE_PATH"); ok {
-		cfg.Api.Static.FilesPath = key
-	}
-
-	if key, ok := os.LookupEnv("RP_ENABLE_TLS"); ok {
-		if keyBool, err := strconv.ParseBool(key); err == nil {
-			cfg.Api.Tls.Enable = keyBool
+	if configFullPath != "" {
+		if err := cleanenv.ReadConfig(filepath.Clean(*ConfigPathFlag), &cfg); err != nil {
+			log.Println("Failed to read config file:", *ConfigPathFlag, err)
 		}
+	} else {
+		log.Println("Configuration file not found!")
 	}
 
-	if key, ok := os.LookupEnv("RP_TLS_CERT_FILE_PATH"); ok {
-		cfg.Api.Tls.CertFilePath = key
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		log.Println("Failed to read env:", *ConfigPathFlag, err)
 	}
 
-	if key, ok := os.LookupEnv("RP_TLS_KEY_FILE_PATH"); ok {
-		cfg.Api.Tls.KeyFilePath = key
+	// Создание файла конфигурации на основе собранного конфига
+	cfg.createToml(configFullPath)
+
+	return &cfg, nil
+}
+
+func (c *Config) createToml(filePath string) {
+	if filePath != "" {
+
 	}
 
-	if key, ok := os.LookupEnv("RP_API_TOKEN_SECRET"); ok {
-		cfg.Api.TokenSecret = key
-	}
-
-	if key, ok := os.LookupEnv("RP_TCS_HOST"); ok {
-		cfg.Tcs.Host = key
-	}
-
-	if key, ok := os.LookupEnv("RP_TCS_CLIENT_ID"); ok {
-		cfg.Tcs.ClientId = key
-	}
-
-	if key, ok := os.LookupEnv("RP_TCS_CLIENT_SECRET"); ok {
-		cfg.Tcs.ClientSecret = key
-	}
-
-	var err error
-
-	switch {
-	case *ConfigPathFlag != DefaultConfigPath:
-		err = cleanenv.ReadConfig(*ConfigPathFlag, cfg)
-	case len(DefaultConfigPath) > 0:
-		err = cleanenv.ReadConfig(DefaultConfigPath, cfg)
-	}
-
+	f, err := os.Create("web-api.toml")
 	if err != nil {
-		return nil, err
+		// failed to create/open the file
+		log.Println(err.Error())
+	}
+	if err := toml.NewEncoder(f).Encode(c); err != nil {
+		// failed to encode
+		log.Println(err.Error())
 	}
 
-	return cfg, nil
+	if err := f.Close(); err != nil {
+		log.Println(err.Error())
+	}
+}
+
+func isExistConfig(filename string) bool {
+	_, err := os.Stat(filename)
+	if err != nil {
+		return false
+	}
+
+	return true
 }

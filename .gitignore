@@ -3,3 +3,4 @@ api/bin/
 api/*.exe
 api/.env
 /.env
+/api/web-api.toml
